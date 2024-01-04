@@ -1,117 +1,116 @@
-//Variaveis
-
-//de Contexto
-const  html = document.querySelector('html')
-const  focuBt = document.querySelector('.app__card-button--foco');
-const  curtoBt = document.querySelector('.app__card-button--curto');
-const  longoBt = document.querySelector('.app__card-button--longo');
-const banner = document.querySelector('.app__image');
-const  title = document.querySelector('.app__title');
-
-//de musica
-const  musicaFocuInput = document.querySelector('#alternar-musica');
-const  music = new Audio('/sons/luna-rise-part-one.mp3')
-music.loop = true;
-
-//de Temporizador
-const  startPauseBt = document.querySelector('#start-pause');
-let tempoDecorricoEmSegundos = 1500;
-let intervaloId = null;
-const playAudio = new Audio('/sons/play.wav')
-const pauseAudio = new Audio('/sons/pause.mp3')
-const finalTemp = new Audio('sons/beep.mp3')
+const html = document.querySelector('html')
+const focoBt = document.querySelector('.app__card-button--foco')
+const curtoBt = document.querySelector('.app__card-button--curto')
+const longoBt = document.querySelector('.app__card-button--longo')
+const banner = document.querySelector('.app__image')
+const titulo = document.querySelector('.app__title')
+const botoes = document.querySelectorAll('.app__card-button')
+const startPauseBt = document.querySelector('#start-pause')
+const musicaFocoInput = document.querySelector('#alternar-musica')
 const iniciarOuPausarBt = document.querySelector('#start-pause span')
-const imgBt = document.querySelector('#start-pause img')
-const timer = document.querySelector('#timer')
+const iniciarOuPausarBtIcone = document.querySelector(".app__card-primary-butto-icon") 
+const tempoNaTela = document.querySelector('#timer')
 
-//Functions
-//de Contexto
-function alterarContexto(button, value) {
-    button.addEventListener('click', () => {
-        html.setAttribute('data-contexto', value );
-        banner.setAttribute('src', `/imagens/${value}.png`)
-        switch (value) {
-            case 'foco':
-                tempoDecorricoEmSegundos = 1500;
-                mostrarTimer();
-                title.innerHTML = 'Otimize sua produtividade,<br>\n' +
-                    '<strong class="app__title-strong">mergulhe no que importa.</strong>'
-                break;
-            case 'descanso-curto':
-                tempoDecorricoEmSegundos = 300;
-                mostrarTimer();
-                title.innerHTML = 'Que tal dar uma respirada?<br>\n' +
-                    '<strong class="app__title-strong">Faça uma pausa curta!</strong>'
-                break;
-            case 'descanso-longo':
-                tempoDecorricoEmSegundos = 900;
-                mostrarTimer();
-                title.innerHTML = 'Hora de voltar à superfície.<br>\n' +
-                    '<strong class="app__title-strong">Faça uma pausa longa.</strong>'
-                break;
-        }
-    });
+const musica = new Audio('/sons/luna-rise-part-one.mp3')
+const audioPlay = new Audio('/sons/play.wav');
+const audioPausa = new Audio('/sons/pause.mp3');
+const audioTempoFinalizado = new Audio('./sons/beep.mp3')
 
-    button.addEventListener('focus', () => {
-        button.classList.add('active')
-    })
+let tempoDecorridoEmSegundos = 30
+let intervaloId = null
 
-    button.addEventListener('blur', () => {
-        button.classList.remove('active')
-    })
-}
+musica.loop = true
 
-alterarContexto(focuBt,'foco', 'foco.png' );
-alterarContexto(curtoBt,'descanso-curto');
-alterarContexto(longoBt,'descanso-longo');
-
-//de Musica
-musicaFocuInput.addEventListener('change', () => {
-    if(music.paused) {
-        music.play();
-    }else {
-        music.pause();
+musicaFocoInput.addEventListener('change', () => {
+    if(musica.paused) {
+        musica.play()
+    } else {
+        musica.pause()
     }
 })
 
-//de Temporizador
+focoBt.addEventListener('click', () => {
+    tempoDecorridoEmSegundos = 30
+    alterarContexto('foco')
+    focoBt.classList.add('active')
+})
 
-const  contagemRegressiva = () => {
-    if (tempoDecorricoEmSegundos <= 0) {
-        //finalTemp.play();
-        alert("Acabou maninho");
-        zerar();
+curtoBt.addEventListener('click', () => {
+    tempoDecorridoEmSegundos = 5
+    alterarContexto('descanso-curto')
+    curtoBt.classList.add('active')
+})
+
+longoBt.addEventListener('click', () => {
+    tempoDecorridoEmSegundos = 15
+    alterarContexto('descanso-longo')
+    longoBt.classList.add('active')
+})
+
+function alterarContexto(contexto) {
+    mostrarTempo()
+    botoes.forEach(function (contexto){
+        contexto.classList.remove('active')
+    })
+    html.setAttribute('data-contexto', contexto)
+    banner.setAttribute('src', `/imagens/${contexto}.png`)
+    switch (contexto) {
+        case "foco":
+            titulo.innerHTML = `
+            Otimize sua produtividade,<br>
+                <strong class="app__title-strong">mergulhe no que importa.</strong>
+            `
+            break;
+        case "descanso-curto":
+            titulo.innerHTML = `
+            Que tal dar uma respirada? <strong class="app__title-strong">Faça uma pausa curta!</strong>
+            ` 
+            break;
+        case "descanso-longo":
+            titulo.innerHTML = `
+            Hora de voltar à superfície.<strong class="app__title-strong"> Faça uma pausa longa.</strong>
+            `
+        default:
+            break;
+    }
+}
+
+const contagemRegressiva = () => {
+    if(tempoDecorridoEmSegundos <= 0){
+        audioTempoFinalizado.play()
+        alert('Tempo finalizado!')
+        zerar()
         return
     }
-    tempoDecorricoEmSegundos -= 1;
-    mostrarTimer();
+    tempoDecorridoEmSegundos -= 1
+    mostrarTempo()
 }
 
 startPauseBt.addEventListener('click', iniciarOuPausar)
 
 function iniciarOuPausar() {
-    if (intervaloId){
-        pauseAudio.play();
+    if(intervaloId){
+        audioPausa.play()
         zerar()
         return
     }
-    playAudio.play();
-    iniciarOuPausarBt.textContent = "Pausar"
-    imgBt.src = '/imagens/pause.png'
+    audioPlay.play()
     intervaloId = setInterval(contagemRegressiva, 1000)
+    iniciarOuPausarBt.textContent = "Pausar"
+    iniciarOuPausarBtIcone.setAttribute('src', `/imagens/pause.png`)
 }
 
 function zerar() {
+    clearInterval(intervaloId) 
     iniciarOuPausarBt.textContent = "Começar"
-    imgBt.src = '/imagens/play_arrow.png'
-    clearInterval(intervaloId);
-    intervaloId = null;
+    iniciarOuPausarBtIcone.setAttribute('src', `/imagens/play_arrow.png`)
+    intervaloId = null
 }
 
-function mostrarTimer() {
-    const tempo = new Date(tempoDecorricoEmSegundos * 1000);
-    const formaterTimer = tempo.toLocaleTimeString('pt-BR',{minute: '2-digit', second: '2-digit'});
-
-    timer.innerHTML = `${formaterTimer}`
+function mostrarTempo() {
+    const tempo = new Date(tempoDecorridoEmSegundos * 1000)
+    const tempoFormatado = tempo.toLocaleTimeString('pt-Br', {minute: '2-digit', second: '2-digit'})
+    tempoNaTela.innerHTML = `${tempoFormatado}`
 }
-mostrarTimer();
+
+mostrarTempo()
